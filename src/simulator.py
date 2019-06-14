@@ -42,7 +42,7 @@ if __name__=='__main__':
     N = 10
     Rint = np.array([0.7])    #r_c = np.array([[0+1e-4,0+1e-4,0+1e-4]])
     r_c = np.array([[0,0,0]])
-    r_s = np.array([2,2,2])
+    r_s = np.array([2,2,0])
     gamma = np.array([1.0])
     omega = 2*np.pi*150
     c = 343.0
