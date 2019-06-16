@@ -147,6 +147,10 @@ def multipoint_sw_weight(x,y,z,r_s,k,d):
         val += d[i,0]*G(x-r_s[i,0],y-r_s[i,1],z-r_s[i,2],k)
     return val
 
+def squared_error_ratio(val_des, val_syn):
+    diff = np.square(val_syn - val_des)**2
+    return 20*np.log(diff/(np.abs(val_des)**2))
+
 
 
 if __name__=='__main__':
@@ -166,33 +170,60 @@ if __name__=='__main__':
     y1 = np.arange(-5,5,0.1)
     z1 = np.arange(0,1,1)
 
-    fig, (axsyn, axdes) = plt.subplots(ncols=2, figsize=(10,4))
+    fig, (axsyn, axdes) = plt.subplots(ncols=2, figsize=(9,4), sharey=True)
+    '''
+    return diff/np.square(val_des)
+    fig = plt.figure(figsize=(8,8))
+    axdes = plt.subplot2grid((2,2), (0,0))
+    axsyn = plt.subplot2grid((2,2), (0,1))
+    axerror = plt.subplot2grid((2,2), (1,0))
+    '''
 
     z_draw = 0 #This is an index.
     '''desired part'''
     val_des = multipoint_sw(x1,y1,z1,r_s,k=omega/c)
     cont_des = axdes.pcolormesh(x1, y1, np.real(val_des[:,:,z_draw]))
     axdes.plot(r_s[0], r_s[1], 'or', label='desired microphone')
-    #axdes.Circle(r_c[:,0], r_c[:,1], Rint, color='b', fillstyle='none')
-    disk1 = plt.Circle(r_s[:,0],r_s[:,1], Rint, color='k', fill=False)
+    disk1 = plt.Circle((r_c[:,0],r_c[:,1]), Rint, color='k', fill=False, linestyle='dashed')
     axdes.add_artist(disk1)
     cont_des.set_clim(-0.02,0.02)
     axdes.set_title('desired')
-    axdes.set_xlabel('x')
-    axdes.set_ylabel('y')
+    axdes.set_aspect('equal', 'box')
+    axdes.set_xlabel('x[m]')
+    axdes.set_ylabel('y[m]')
 
     '''synthesized part'''
     val_syn = multipoint_sw_weight(x1,y1,z1,r,k=omega/c,d=d)
     cont_syn = axsyn.pcolormesh(x1, y1, np.real(val_syn[:,:,z_draw]))
     axsyn.plot(r[:,0], r[:,1], 'or', label='position of loudspeakers')
-    axsyn.add_artist(disk1)
+    disk2 = plt.Circle((r_c[:,0],r_c[:,1]), Rint, color='k', fill=False,linestyle='dashed')
+    axsyn.add_artist(disk2)
     cont_syn.set_clim(-0.02,0.02)
     axsyn.set_title('synthesized')
-    axsyn.set_xlabel('x')
-    axsyn.set_ylabel('y')
+    axsyn.set_aspect('equal', 'box')
+    axsyn.set_xlabel('x[m]')
+    axsyn.set_ylabel('y[m]')
 
     fig.colorbar(cont_syn)
-    
+    fig.tight_layout()
     axdes.legend()
     axsyn.legend()
+
+
+    fig1, axerror = plt.subplots(ncols=1, figsize=(5,4), sharey=True)    
+    '''error part'''
+    val_error = squared_error_ratio(val_des, val_syn)
+    cont_error = axerror.pcolormesh(x1, y1, np.real(val_error[:,:,z_draw]))
+    axerror.plot(r[:,0], r[:,1], 'or', label='position of loudspeakers')
+    disk3 = plt.Circle((r_c[:,0],r_c[:,1]), Rint, color='k', fill=False,linestyle='dashed')
+    axerror.add_artist(disk3)
+    cont_error.set_clim(-400,0)
+    axerror.set_title('NMSE')
+    axerror.set_aspect('equal', 'box')
+    axerror.set_xlabel('x[m]')
+    axerror.set_ylabel('y[m]')
+
+    fig1.colorbar(cont_error)
+    axerror.legend()
+
     plt.show()
