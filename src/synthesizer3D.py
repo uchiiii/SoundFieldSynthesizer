@@ -148,17 +148,24 @@ def multipoint_sw_weight(x,y,z,r_s,k,d):
     return val
 
 def squared_error_ratio(val_des, val_syn):
-    diff = np.square(val_syn - val_des)**2
-    return 20*np.log(diff/(np.abs(val_des)**2))
-
+    diff = np.abs(val_syn - val_des)**2
+    return 10*np.log(diff/(np.abs(val_des)**2))
 
 
 if __name__=='__main__':
-    r = np.array([[1,1,1],[1,-1,1],[-1,1,1],[-1,-1,1],[1,1,-1],[1,-1,-1],[-1,1,-1],[-1,-1,-1]])
+    #r = np.array([[-2,1,0.2],[-2,-1,0.2],[-2,1,0.2],[-2,-1,0.2],[-2,1,-0.2],[-2,-1,-0.2],[-2,1,-0.2],[-2,-1,-0.2]])
+    NUM_L = 12 #the number of the used loudspeakers
+    r = np.zeros((NUM_L,3))
+    r[:,0] = -2
+    if int((NUM_L/2)) != NUM_L/2:
+        print('The number of the used loudspeakers is supposed to be even on this code.')
+        sys.exit()
+    r[:,2] = np.array([-0.2,0.2]*int((NUM_L/2))) 
+    r[:,1] = np.linspace(-2.4,2.4,NUM_L)
     N = 5
-    Rint = np.array([0.7])
-    r_c = np.array([[0,0,0]])
-    r_s = np.array([-2,-2,0])
+    Rint = np.array([0.7]) 
+    r_c = np.array([[0,0,0]]) #the center of target sphere 
+    r_s = np.array([-3,0,0]) #the desired position of speaker
     gamma = np.array([1.0])
     omega = 2*np.pi*150
     c = 343.0
@@ -217,7 +224,7 @@ if __name__=='__main__':
     axerror.plot(r[:,0], r[:,1], 'or', label='position of loudspeakers')
     disk3 = plt.Circle((r_c[:,0],r_c[:,1]), Rint, color='k', fill=False,linestyle='dashed')
     axerror.add_artist(disk3)
-    cont_error.set_clim(-400,0)
+    cont_error.set_clim(-50,0)
     axerror.set_title('NMSE')
     axerror.set_aspect('equal', 'box')
     axerror.set_xlabel('x[m]')
