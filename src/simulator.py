@@ -40,7 +40,6 @@ def squared_error_ratio(val_des, val_syn):
 
 
 if __name__=='__main__':
-    #r = np.array([[-2,1,0.2],[-2,-1,0.2],[-2,1,0.2],[-2,-1,0.2],[-2,1,-0.2],[-2,-1,-0.2],[-2,1,-0.2],[-2,-1,-0.2]])
     NUM_L = 12 #the number of the used loudspeakers
     r = np.zeros((NUM_L,3))
     r[:,0] = -2
@@ -50,10 +49,10 @@ if __name__=='__main__':
     r[:,2] = np.array([-0.2,0.2]*int((NUM_L/2))) 
     r[:,1] = np.linspace(-2.4,2.4,NUM_L)
     N = 5
-    Rint = np.array([0.7]) 
-    r_c = np.array([[0,0,0]]) #the center of target sphere 
+    Rint = np.array([0.5,0.5]) 
+    r_c = np.array([[0,0,0],[4,-4,0]]) #the center of target sphere 
     r_s = np.array([-3,0,0]) #the desired position of speaker
-    gamma = np.array([1.0])
+    gamma = np.array([1.0,1.0])
     omega = 2*np.pi*150
     c = 343.0
     test_mmm = ModelMatchM(r=r,r_c=r_c,r_s=r_s,Rint=Rint,gamma=gamma,N=N)
@@ -71,8 +70,9 @@ if __name__=='__main__':
     val_des = multipoint_sw(x1,y1,z1,r_s,k=omega/c)
     cont_des = axdes.pcolormesh(x1, y1, np.real(val_des[:,:,z_draw]))
     axdes.plot(r_s[0], r_s[1], 'or', label='desired microphone')
-    disk1 = plt.Circle((r_c[:,0],r_c[:,1]), Rint, color='k', fill=False, linestyle='dashed')
-    axdes.add_artist(disk1)
+    for i in range(gamma.shape[0]):
+        disk1 = plt.Circle((r_c[i,0],r_c[i,1]), Rint[i], color='k', fill=False, linestyle='dashed')
+        axdes.add_artist(disk1)
     cont_des.set_clim(-0.02,0.02)
     axdes.set_title('desired')
     axdes.set_aspect('equal', 'box')
@@ -83,8 +83,9 @@ if __name__=='__main__':
     val_syn = multipoint_sw_weight(x1,y1,z1,r,k=omega/c,d=d)
     cont_syn = axsyn.pcolormesh(x1, y1, np.real(val_syn[:,:,z_draw]))
     axsyn.plot(r[:,0], r[:,1], 'or', label='position of loudspeakers')
-    disk2 = plt.Circle((r_c[:,0],r_c[:,1]), Rint, color='k', fill=False,linestyle='dashed')
-    axsyn.add_artist(disk2)
+    for i in range(gamma.shape[0]):
+        disk2 = plt.Circle((r_c[i,0],r_c[i,1]), Rint[i], color='k', fill=False,linestyle='dashed')
+        axsyn.add_artist(disk2)
     cont_syn.set_clim(-0.02,0.02)
     axsyn.set_title('synthesized')
     axsyn.set_aspect('equal', 'box')
@@ -96,14 +97,14 @@ if __name__=='__main__':
     axdes.legend()
     axsyn.legend()
 
-
     fig1, axerror = plt.subplots(ncols=1, figsize=(5,4), sharey=True)    
     '''error part'''
     val_error = squared_error_ratio(val_des, val_syn)
     cont_error = axerror.pcolormesh(x1, y1, np.real(val_error[:,:,z_draw]))
     axerror.plot(r[:,0], r[:,1], 'or', label='position of loudspeakers')
-    disk3 = plt.Circle((r_c[:,0],r_c[:,1]), Rint, color='k', fill=False,linestyle='dashed')
-    axerror.add_artist(disk3)
+    for i in range(gamma.shape[0]):
+        disk3 = plt.Circle((r_c[i,0],r_c[i,1]), Rint[i], color='k', fill=False,linestyle='dashed')
+        axerror.add_artist(disk3)
     cont_error.set_clim(-50,0)
     axerror.set_title('NMSE')
     axerror.set_aspect('equal', 'box')

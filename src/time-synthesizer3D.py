@@ -43,9 +43,8 @@ class ModelMatchM:
             d_s[:,M-1+i] = d
             if i != M:
                 d_s[:,M-1-i] = np.conj(d)
-        ans = np.zeros_like(d_s)
-        for i in range(self.L):
-            ans[i,:] = spfft.ifft(d_s[i,:])
+        #ans = np.zeros_like(d_s)
+        ans = spfft.ifft(d_s,axis=1)
         
         elapsed_time = time.time()-start
         print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
@@ -131,7 +130,8 @@ class ModelMatchM:
         return np.dot(np.linalg.inv(A + _lambda*np.eye(A.shape[0], dtype=np.complex)), b)
 
 if __name__=='__main__':
-    #r = np.array([[-2,1,0.2],[-2,-1,0.2],[-2,1,0.2],[-2,-1,0.2],[-2,1,-0.2],[-2,-1,-0.2],[-2,1,-0.2],[-2,-1,-0.2]])
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
     NUM_L = 12 #the number of the used loudspeakers
     r = np.zeros((NUM_L,3))
     r[:,0] = -2
@@ -141,17 +141,21 @@ if __name__=='__main__':
     r[:,2] = np.array([-0.2,0.2]*int((NUM_L/2))) 
     r[:,1] = np.linspace(-2.4,2.4,NUM_L)
     N = 5
-    Rint = np.array([0.7]) 
-    r_c = np.array([[0,0,0]]) #the center of target sphere 
+    Rint = np.array([0.7,0.5]) 
+    r_c = np.array([[0,0,0],[1,1,1]]) #the center of target sphere 
     r_s = np.array([-3,0,0]) #the desired position of speaker
-    gamma = np.array([1.0])
+    gamma = np.array([1.0,1.0])
     omega = 2*np.pi*150
     c = 343.0
     test_mmm = ModelMatchM(r=r,r_c=r_c,r_s=r_s,Rint=Rint,gamma=gamma)
-    val = test_mmm.exploit_transfer_func_T(M=512)
+    M = 512
+    omega_mx = 4000
+    val = test_mmm.exploit_transfer_func_T(omega_mx=omega_mx,M=M)
     print(val.shape)
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as patches
     for i in range(12):
-        plt.plot(val[i,:])
+        plt.plot(np.arange(0,(2*np.pi)/(omega_mx/M),(np.pi)/omega_mx)[0:100] ,np.real(val[i,0:100])) 
+    plt.title('transfer function')
+    plt.xlabel('t [s]')
+    #plt.set_ylabel('')
+    #plt.legend()
     plt.show()
