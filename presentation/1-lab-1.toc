@@ -1,0 +1,5 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{Gaussian distribution(ガウス分布)}{3}{0}{1}
+\beamer@sectionintoc {2}{ガウス分布と最尤推定}{4}{0}{2}
+\beamer@sectionintoc {3}{曲線フィッティング}{9}{0}{3}
+\beamer@sectionintoc {4}{ベイズ曲線フィッティング}{13}{0}{4}

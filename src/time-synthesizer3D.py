@@ -113,11 +113,11 @@ class ModelMatchM:
             mu = np.array([j for i in range(0,N+1) for j in range(-i,i+1)] )
             r,theta,phi = self.__cart2sp(x=self.r[:,0]-self.r_c[idx,0], y=self.r[:,1]-self.r_c[idx,1], z=self.r[:,2]-self.r_c[idx,2])
             _r_c, _r_c_theta, _r_c_phi = self.__cart2sp(x=self.r_s[0]-self.r_c[idx,0], y=self.r_s[1]-self.r_c[idx,1], z=self.r_s[2]-self.r_c[idx,2])
-            W = self.__get_W(k,idx,nu)
+            W_uni = self.__get_interior_weight(k,idx,nu)
             C = self.__get_C(k,r,theta,phi,nu,mu)
             g = self.__get_g(k,_r_c,_r_c_theta,_r_c_phi,nu,mu)
-            A += self.gamma[idx]*np.dot(np.conj(C).T, np.dot(W, C))
-            b += self.gamma[idx]*np.dot(np.conj(C).T, np.dot(W, g))
+            A += self.gamma[idx]*np.dot(np.conj(C).T*W_uni, C)
+            b += self.gamma[idx]*np.dot(np.conj(C).T*W_uni, g)
         return A,b
 
     def __exploit_d(self,k):
@@ -153,7 +153,7 @@ if __name__=='__main__':
     val = test_mmm.exploit_transfer_func_T(omega_mx=omega_mx,M=M)
     print(val.shape)
     for i in range(12):
-        plt.plot(np.arange(0,(2*np.pi)/(omega_mx/M),(np.pi)/omega_mx)[0:100] ,np.real(val[i,0:100])) 
+        plt.plot(np.arange(0,(2*np.pi)/(omega_mx/M),(np.pi)/omega_mx) ,np.real(val)[0,:]) 
     plt.title('transfer function')
     plt.xlabel('t [s]')
     #plt.set_ylabel('')

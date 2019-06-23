@@ -93,12 +93,14 @@ class ModelMatchM:
             _r_c, _r_c_theta, _r_c_phi = self.__cart2sp(x=self.r_s[0]-self.r_c[idx,0], y=self.r_s[1]-self.r_c[idx,1], z=self.r_s[2]-self.r_c[idx,2])
 
             print(_r_c, _r_c_theta, _r_c_phi)
-            W = self.__get_W(k, idx)
-            print('W={}'.format(W))
+            #W = self.__get_W(k, idx)
+            W_uni = self.__get_interior_weight(k,idx)
+            #print('W={}'.format(W))
             C = self.__get_C(k,r,theta,phi)
             g = self.__get_g(k,_r_c,_r_c_theta,_r_c_phi)
-            A += self.gamma[idx]*np.dot(np.conj(C).T, np.dot(W, C))
-            b += self.gamma[idx]*np.dot(np.conj(C).T, np.dot(W, g))
+            print(C.shape)
+            A += self.gamma[idx]*np.dot(np.conj(C).T*W_uni, C)
+            b += self.gamma[idx]*np.dot(np.conj(C).T*W_uni,  g)
         return A,b
 
     def exploit_d(self,k):

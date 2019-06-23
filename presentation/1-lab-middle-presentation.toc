@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{問題設定}{3}{0}{1}
+\beamer@sectionintoc {2}{球面調和関数を基底に用いる手法}{6}{0}{2}
+\beamer@sectionintoc {3}{シミュレーション結果}{11}{0}{3}
+\beamer@sectionintoc {4}{今後の方針}{14}{0}{4}
+\beamer@sectionintoc {5}{参考文献}{15}{0}{5}
