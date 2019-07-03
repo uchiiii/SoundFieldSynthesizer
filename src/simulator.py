@@ -75,7 +75,7 @@ if __name__=='__main__':
         axdes.add_artist(disk1)
     cont_des.set_clim(-0.02,0.02)
     axdes.set_title('desired')
-    axdes.set_aspect('equal', 'box')
+    #axdes.set_aspect('equal', 'box')
     axdes.set_xlabel('x[m]')
     axdes.set_ylabel('y[m]')
 
@@ -88,7 +88,7 @@ if __name__=='__main__':
         axsyn.add_artist(disk2)
     cont_syn.set_clim(-0.02,0.02)
     axsyn.set_title('synthesized')
-    axsyn.set_aspect('equal', 'box')
+    #axsyn.set_aspect('equal', 'box')
     axsyn.set_xlabel('x[m]')
     axsyn.set_ylabel('y[m]')
 
@@ -107,7 +107,7 @@ if __name__=='__main__':
         axerror.add_artist(disk3)
     cont_error.set_clim(-50,0)
     axerror.set_title('NMSE')
-    axerror.set_aspect('equal', 'box')
+    #axerror.set_aspect('equal', 'box')
     axerror.set_xlabel('x[m]')
     axerror.set_ylabel('y[m]')
 

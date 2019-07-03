@@ -6,6 +6,7 @@ from ai import cs
 from tqdm import tqdm
 import sys
 import time
+import cis
 
 class ModelMatchM:
     '''
@@ -27,10 +28,25 @@ class ModelMatchM:
         self.r = r
         self.r_c = r_c
         self.r_s = r_s
+
+    def create_wav(self,input_file,output_file,M):
+        '''
+        assume that input wave is mono
+        '''
+        rate, data = cis.wavread(input_file)
+        omega_mx = np.pi*rate
+        filt = self.exploit_transfer_func_T(self,input_file,output_file,omega_mx=omega_mx,M=M)
+        ans = np.zeros((self.L,data.shape[0]))
+        for i in range(self.L):
+            ans[i,:] = np.convolve(data,filt,mode='same')
+        cis.wavwrite(output_file,rate,ans)
+        print('creating wav : DONE.')
+        
         
     def exploit_transfer_func_T(self,omega_mx=4000,M=512):
         '''
         M: the number of omega.
+        return filter.
         '''
         start = time.time()
         omega_s = np.linspace(0,omega_mx,M+1)
@@ -47,7 +63,7 @@ class ModelMatchM:
         ans = spfft.ifft(d_s,axis=1)
         
         elapsed_time = time.time()-start
-        print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
+        print("elapsed_time of filter:{0}".format(elapsed_time) + "[sec]")
         return ans
         
     def __hankel(self,n,z):
@@ -153,7 +169,8 @@ if __name__=='__main__':
     val = test_mmm.exploit_transfer_func_T(omega_mx=omega_mx,M=M)
     print(val.shape)
     for i in range(12):
-        plt.plot(np.arange(0,(2*np.pi)/(omega_mx/M),(np.pi)/omega_mx) ,np.real(val)[0,:]) 
+        #plt.plot(np.arange(0,(2*np.pi)/(omega_mx/M),(np.pi)/omega_mx) ,np.real(val)[0,:]) 
+        plt.plot(np.real(val)[i,:])
     plt.title('transfer function')
     plt.xlabel('t [s]')
     #plt.set_ylabel('')

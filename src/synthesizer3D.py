@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 from scipy.special import *  
 from ai import cs
+from numba import jit
 
 class ModelMatchM:
     '''
@@ -37,7 +38,7 @@ class ModelMatchM:
     def __get_index_harmonic(self):
         a = np.arange(0,self.N+1)
         return np.repeat(a, 2*a+1)
-        
+   
     def __c_element(self,k,nu,mu,r,theta,phi):
         return 1.0j*k*self.__hankel(nu, k*r) * np.conj(self.__sph_harm(mu, nu, theta, phi))
     
