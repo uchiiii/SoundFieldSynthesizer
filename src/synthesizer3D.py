@@ -8,14 +8,15 @@ class ModelMatchM:
     '''
     This is implemented with the iterior uniformly wighted L2 norm.
     '''  
-    def __init__(self, r, r_c, r_s, Rint, gamma ,N):
+    def __init__(self, r, r_c, r_s, Rint, gamma, is_silent, N):
         '''
         input
             r:(L,3) array which includes the position of all the L speakers on the cartician coordinate.
-            r_c:(Q,3) array which includes the position of the centers of each area.
+            r_c:(Q,3) array which includes the position of the centers of each of Q areas.
             r_s:()
             Rint:(Q) array of the redius of sphere.
-            gamma:(Q) array of the weights of the each sphere.  
+            gamma:(Q) array of the weights of the each sphere.
+            is_silent:(Q) array,1 if an area is silent, 0 if it is not.
             N: the trunction orders.
         '''
         self.c = 343.0
@@ -26,6 +27,7 @@ class ModelMatchM:
         self.r = r
         self.r_c = r_c
         self.r_s = r_s
+        self.is_silent = is_silent
         self.nu = self.__get_index_harmonic()
         self.mu = np.array([j for i in range(0,self.N+1) for j in range(-i,i+1)] )
         print('nu={}'.format(self.nu))
@@ -101,7 +103,8 @@ class ModelMatchM:
             g = self.__get_g(k,_r_c,_r_c_theta,_r_c_phi)
             print(C.shape)
             A += self.gamma[idx]*np.dot(np.conj(C).T*W_uni, C)
-            b += self.gamma[idx]*np.dot(np.conj(C).T*W_uni,  g)
+            if self.is_silent[idx] == 0:
+                b += self.gamma[idx]*np.dot(np.conj(C).T*W_uni,  g)
         return A,b
 
     def exploit_d(self,k):

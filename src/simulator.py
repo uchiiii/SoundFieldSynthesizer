@@ -16,11 +16,16 @@ def G(x,y,z,k):
     abs_rel = np.sqrt(np.square(x)+np.square(y)+np.square(z))
     return 1.0j*k/(4*np.pi)*hankel(0, k*abs_rel)
 
+def is_in_circle(center, r, x,y,z):
+    return (x-center[0])**2+(y-center[1])**2+(z-center[2])**2<r**2
 
-def multipoint_sw(x,y,z,r_s,k):
+
+def multipoint_sw(x,y,z,r_s,k,hasempty,center,r):
     '''return p_syn(r,w=kc)'''
     x,y,z = np.meshgrid(x,y,z)
     val = G(x-r_s[0],y-r_s[1],z-r_s[2],k)
+    if hasempty == True:
+        val = np.where(is_in_circle(center,r,x,y,z),0,val)
     return val
 
 def multipoint_sw_weight(x,y,z,r_s,k,d):
@@ -40,7 +45,7 @@ def squared_error_ratio(val_des, val_syn):
 
 
 if __name__=='__main__':
-    NUM_L = 12 #the number of the used loudspeakers
+    NUM_L = 8 #the number of the used loudspeakers
     r = np.zeros((NUM_L,3))
     r[:,0] = -2
     if int((NUM_L/2)) != NUM_L/2:
@@ -48,14 +53,15 @@ if __name__=='__main__':
         sys.exit()
     r[:,2] = np.array([-0.2,0.2]*int((NUM_L/2))) 
     r[:,1] = np.linspace(-2.4,2.4,NUM_L)
-    N = 5
     Rint = np.array([0.5,0.5]) 
-    r_c = np.array([[0,0,0],[4,-4,0]]) #the center of target sphere 
+    r_c = np.array([[1,1,0],[1,-1,0]]) #the center of target sphere
     r_s = np.array([-3,0,0]) #the desired position of speaker
-    gamma = np.array([1.0,1.0])
-    omega = 2*np.pi*150
+    is_silent = np.array([1,0])
+    gamma = np.array([1.0,1.0]) #wight of each target sphere
+    omega = 2*np.pi*500
     c = 343.0
-    test_mmm = ModelMatchM(r=r,r_c=r_c,r_s=r_s,Rint=Rint,gamma=gamma,N=N)
+    N = 10
+    test_mmm = ModelMatchM(r=r,r_c=r_c,r_s=r_s,Rint=Rint,gamma=gamma,is_silent=is_silent,N=N)
     d = test_mmm.exploit_d(k=omega/c)
     print(d)
 
@@ -63,11 +69,12 @@ if __name__=='__main__':
     y1 = np.arange(-5,5,0.1)
     z1 = np.arange(0,1,1)
 
-    fig, (axsyn, axdes) = plt.subplots(ncols=2, figsize=(9,4), sharey=True)
+    fig, (axsyn, axdes) = plt.subplots(ncols=2, figsize=(8.5,4), sharey=True)
 
     z_draw = 0 #This is an index.
+    
     '''desired part'''
-    val_des = multipoint_sw(x1,y1,z1,r_s,k=omega/c)
+    val_des = multipoint_sw(x1,y1,z1,r_s,k=omega/c,hasempty=True,center=r_c[0,:],r=Rint[0])
     cont_des = axdes.pcolormesh(x1, y1, np.real(val_des[:,:,z_draw]))
     axdes.plot(r_s[0], r_s[1], 'or', label='desired microphone')
     for i in range(gamma.shape[0]):
@@ -75,7 +82,8 @@ if __name__=='__main__':
         axdes.add_artist(disk1)
     cont_des.set_clim(-0.02,0.02)
     axdes.set_title('desired')
-    #axdes.set_aspect('equal', 'box')
+    #axdes.axis('equal', 'box')
+    #axdes.set_aspect('equal')
     axdes.set_xlabel('x[m]')
     axdes.set_ylabel('y[m]')
 
@@ -88,7 +96,8 @@ if __name__=='__main__':
         axsyn.add_artist(disk2)
     cont_syn.set_clim(-0.02,0.02)
     axsyn.set_title('synthesized')
-    #axsyn.set_aspect('equal', 'box')
+    #axsyn.set_aspect('equal')
+    #axsyn.axis('equal', 'box')
     axsyn.set_xlabel('x[m]')
     axsyn.set_ylabel('y[m]')
 

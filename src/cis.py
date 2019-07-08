@@ -1,6 +1,8 @@
 import numpy as np
 #import simpleaudio as sa
 import scipy.io.wavfile as sw
+import wave
+from wavefile import write
 
 '''
 def audioplay(fs, y):
@@ -26,7 +28,7 @@ def wavread(wavefile):
     return fs, y
 
 
-def wavwrite(wavefile, fs, data):
+def wavwrite(wavefile, fs, data, nchannel):
     if data.dtype == 'float32' or data.dtype == 'float64':
         max_y = np.max(np.abs(data))
     elif data.dtype == 'uint8':
@@ -36,5 +38,14 @@ def wavwrite(wavefile, fs, data):
         max_y = np.abs(np.iinfo(np.int16).min)
     else:
         max_y = np.abs(np.iinfo(np.int16).min)
+    max_y *= 8
     data = np.int16(data / max_y * np.abs(np.iinfo(np.int16).min))
-    sw.write(wavefile, fs, data)
+    write(wavefile, fs, data)
+    '''
+    w = wave.Wave_write(wavefile)
+    w.setnchannels(nchannel)
+    w.setsampwidth(2)
+    w.setframerate(fs)
+    w.writeframes(data)
+    w.close()
+    '''
