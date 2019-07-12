@@ -39,13 +39,7 @@ def wavwrite(wavefile, fs, data, nchannel):
     else:
         max_y = np.abs(np.iinfo(np.int16).min)
     max_y *= 8
+    if max_y == 0:
+        max_y = 1.0
     data = np.int16(data / max_y * np.abs(np.iinfo(np.int16).min))
     write(wavefile, fs, data)
-    '''
-    w = wave.Wave_write(wavefile)
-    w.setnchannels(nchannel)
-    w.setsampwidth(2)
-    w.setframerate(fs)
-    w.writeframes(data)
-    w.close()
-    '''

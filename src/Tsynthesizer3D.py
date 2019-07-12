@@ -38,7 +38,7 @@ class ModelMatchM:
 
     def create_wav(self,input_file,output_file,f_max,f_low,M):
         '''
-        assume that input wave is mono
+        Writes the wav file of driving signals of each speaker.
         '''
         print('START!')
         rate, data = cis.wavread(input_file)
@@ -193,6 +193,7 @@ if __name__=='__main__':
     import matplotlib.pyplot as plt
     import matplotlib.patches as patches
     '''
+    #example 1
     NUM_L = 12 #the number of the used loudspeakers
     r = np.zeros((NUM_L,3))
     r[:,0] = -2
@@ -202,6 +203,7 @@ if __name__=='__main__':
     r[:,2] = np.array([-0.2,0.2]*int((NUM_L/2))) 
     r[:,1] = np.linspace(-2.4,2.4,NUM_L)
     '''
+    #example 2
     NUM_L = 9 #the number of the used loudspeakers
     r = np.zeros((NUM_L,3))
     x_diff = 44.5/2.0*1.0e-2
@@ -217,6 +219,7 @@ if __name__=='__main__':
             r[i,2] = z_diff/2
     Rint = np.array([0.5])
     is_silent = np.array([0])
+    
     r_c = np.array([[1.0,1.3,0]]) #the center of target sphere 
     r_s = np.array([-2,1.3,0]) #the desired position of speaker
     gamma = np.array([1.0])

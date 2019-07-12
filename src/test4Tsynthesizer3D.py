@@ -55,14 +55,17 @@ if __name__=='__main__':
     print('r = {}'.format(r))
     c = 343.0
     test_mmm = ModelMatchM(r=r,r_c=r_c,r_s=r_s,Rint=Rint,gamma=gamma,is_silent=is_silent)
+    for i in range(10):
+        test_mmm.r_s = np.array([0,i,2*i])
+        #print(test_mmm.r_s)
     M = 512
     f_max = 1000
     f_low = 500
 
-    #input_file='./tests/asano.wav'
+    input_file='./tests/asano.wav'
     #input_file='./tests/maracas.wav'
-    input_file='./tests/whitenoise.wav'
-    output_file='./tests/created_multi_white.wav' 
+    #input_file='./tests/whitenoise.wav'
+    output_file='./tests/created_multi.wav' 
     #output_file='./tests/created_single.wav' 
     test_mmm.create_wav(input_file,output_file,f_max=f_max,f_low=f_low,M=M)
 
