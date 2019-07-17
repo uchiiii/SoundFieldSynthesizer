@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 from scipy.special import *  
 import scipy.fftpack as spfft
+from scipy import signal
 from ai import cs
 from tqdm import tqdm
 import sys
@@ -64,8 +65,11 @@ class ModelMatchM:
         
         start = time.time()
 
+        _ans = signal.fftconvolve(data,self.filt,mode='same', axes=1)[0:length]
+        '''
         for i in range(self.L):
             _ans[i,:] =  np.convolve(data,filt[i,:],mode='full')[0:length]
+        '''
         elapsed_time = time.time()-start
         print("- elapsed_time of covolution:{0}".format(elapsed_time) + "[sec]")
 

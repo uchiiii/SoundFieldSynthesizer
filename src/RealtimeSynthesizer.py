@@ -6,7 +6,8 @@ import time
 import threading
 import numpy as np
 import scipy as sp
-from scipy.special import *  
+from scipy.special import *
+from scipy import signal
 import scipy.fftpack as spfft
 from ai import cs
 import librosa
@@ -43,8 +44,10 @@ class RealtimeSynthesizer:
         self.omega_low = 2*np.pi*self.f_low
         self.filt = np.zeros((self.L,2*self.M))
 
+        self.lock = threading.Lock()
+
         '''pyaudio part'''
-        self.chunk = 1024 #length of chunk for pyaudio
+        self.chunk = 32768 #length of chunk for pyaudio
         self.format = pyaudio.paInt16 #format
 
         self.out_fname = fname # output filename
@@ -148,35 +151,56 @@ class RealtimeSynthesizer:
         self.pa.terminate()
 
     def callback(self, in_data, frame_count, time_info, status):
+        start = time.time()
+
         playbuff = np.zeros((self.nchannel,self.chunk), dtype=self.format_np)
         p_data = self.wf_out.readframes(self.chunk)
         prev_nframes = int(len(p_data)/self.n_out_channel/self.nbyte)
+        #start = time.time()
         data = self.convolve_filter(np.frombuffer(p_data, dtype=self.format_np).reshape(prev_nframes, self.n_out_channel).T)
+        #elapsed_time = time.time()-start
+        #print("- elapsed_time of convolve:{0}".format(elapsed_time) + "[sec]")
         cur_nframes = int(min(self.chunk, data.shape[1]))
+        #start = time.time()
         playbuff[self.start_channel-1:self.nchannel,0:cur_nframes] = self.float2int(data[:,0:cur_nframes])
+        #elapsed_time = time.time()-start
+        #print("- elapsed_time of cast:{0}".format(elapsed_time) + "[sec]")
         pa_outdata = (playbuff.T).reshape((self.chunk*self.nchannel,1))
+        
+        '''
+        playbuff = np.zeros((self.nchannel,self.chunk), dtype=self.format_np)
+        data = self.wf_out.readframes(self.chunk)
+        cur_nframes = int(len(data)/self.n_out_channel/self.nbyte)
+        playbuff[self.start_channel-1:self.nchannel,0:cur_nframes] = np.frombuffer(data, dtype=self.format_np).reshape(cur_nframes, self.n_out_channel).T
+        pa_outdata = (playbuff.T).reshape((self.chunk*self.nchannel,1))
+        '''
+        
         self.ifrm += 1
         if self.ifrm == int(np.ceil(self.nframe/self.chunk)):
             self.wf_out.rewind()
             self.ifrm = 0
+        elapsed_time = time.time()-start
+        print("- elapsed_time of filter:{0}".format(elapsed_time) + "[sec]")
         return (pa_outdata, pyaudio.paContinue)
 
     def waitstream(self):
         #while self.flg_stop<1:
         while True:
-            time.sleep(0.1)
+            time.sleep(0.5)
             #if self.stream.is_active()==0:
                 #self.flg_stop = 1
 
     def update_source(self):
         while True:
-            print('x y z = ?')
+            print('x y z = ?\n')
             r_s =  list(map(float, input().split()))
             if len(r_s) != 3:
                 print('input should be 3 float numbers separated with space.')
                 continue
             self.r_s = np.array(r_s,dtype=np.float)
+            self.lock.acquire()
             self.filt = self.exploit_transfer_func_T()
+            self.lock.release()
 
     def float2int(self,data):
         if data.dtype == 'float32' or data.dtype == 'float64':
@@ -212,8 +236,13 @@ class RealtimeSynthesizer:
 
         _ans = np.zeros((self.L,length))
 
+        self.lock.acquire()
+        _ans = signal.fftconvolve(data,self.filt,mode='same', axes=1)[0:length]
+        '''
         for i in range(self.L):
             _ans[i,:] =  np.convolve(data,self.filt[i,:],mode='same')[0:length]
+        '''
+        self.lock.release()
 
         test = librosa.resample(_ans[0,:],rate,self.Fs)
         resampled = np.zeros((self.L,test.shape[0]))
@@ -351,7 +380,7 @@ if __name__== '__main__':
     gamma = np.array([5.0,1.0])
 
 
-    obj = RealtimeSynthesizer("./tests/asano.wav",r, r_c, r_s, Rint, gamma, is_silent,f_max=2000,f_low=200,M=256,start_channel=5,Fs=0,dev_id=2)
+    obj = RealtimeSynthesizer("./tests/asano.wav",r, r_c, r_s, Rint, gamma, is_silent,f_max=1000,f_low=200,M=256,start_channel=5,Fs=0,dev_id=2)
 
     w_th1 = threading.Thread(target=obj.waitstream)
     #w_th2 = threading.Thread(target=obj.update_source)

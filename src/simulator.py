@@ -45,7 +45,7 @@ def squared_error_ratio(val_des, val_syn):
 
 
 if __name__=='__main__':
-    NUM_L = 8 #the number of the used loudspeakers
+    NUM_L = 12 #the number of the used loudspeakers
     r = np.zeros((NUM_L,3))
     r[:,0] = -2
     if int((NUM_L/2)) != NUM_L/2:
@@ -53,12 +53,12 @@ if __name__=='__main__':
         sys.exit()
     r[:,2] = np.array([-0.2,0.2]*int((NUM_L/2))) 
     r[:,1] = np.linspace(-2.4,2.4,NUM_L)
-    Rint = np.array([0.5,0.5]) 
-    r_c = np.array([[1,1,0],[1,-1,0]]) #the center of target sphere
+    Rint = np.array([0.5]) 
+    r_c = np.array([[0,0,0]]) #the center of target sphere
     r_s = np.array([-3,0,0]) #the desired position of speaker
-    is_silent = np.array([1,0])
-    gamma = np.array([1.0,1.0]) #wight of each target sphere
-    omega = 2*np.pi*500
+    is_silent = np.array([0])
+    gamma = np.array([1.0]) #wight of each target sphere
+    omega = 2*np.pi*125
     c = 343.0
     N = 10
     test_mmm = ModelMatchM(r=r,r_c=r_c,r_s=r_s,Rint=Rint,gamma=gamma,is_silent=is_silent,N=N)
@@ -74,16 +74,16 @@ if __name__=='__main__':
     z_draw = 0 #This is an index.
     
     '''desired part'''
-    val_des = multipoint_sw(x1,y1,z1,r_s,k=omega/c,hasempty=True,center=r_c[0,:],r=Rint[0])
+    val_des = multipoint_sw(x1,y1,z1,r_s,k=omega/c,hasempty=False,center=r_c[0,:],r=Rint[0])
     cont_des = axdes.pcolormesh(x1, y1, np.real(val_des[:,:,z_draw]))
-    axdes.plot(r_s[0], r_s[1], 'or', label='desired microphone')
+    axdes.plot(r_s[0], r_s[1], 'or', label='desired position of speaker')
     for i in range(gamma.shape[0]):
         disk1 = plt.Circle((r_c[i,0],r_c[i,1]), Rint[i], color='k', fill=False, linestyle='dashed')
         axdes.add_artist(disk1)
     cont_des.set_clim(-0.02,0.02)
-    axdes.set_title('desired')
+    #axdes.set_title('desired')
     #axdes.axis('equal', 'box')
-    #axdes.set_aspect('equal')
+    axdes.set_aspect('equal')
     axdes.set_xlabel('x[m]')
     axdes.set_ylabel('y[m]')
 
