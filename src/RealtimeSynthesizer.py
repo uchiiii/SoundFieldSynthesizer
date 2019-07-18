@@ -47,7 +47,7 @@ class RealtimeSynthesizer:
         self.lock = threading.Lock()
 
         '''pyaudio part'''
-        self.chunk = 32768 #length of chunk for pyaudio
+        self.chunk = 65536 #length of chunk for pyaudio
         self.format = pyaudio.paInt16 #format
 
         self.out_fname = fname # output filename
@@ -141,7 +141,7 @@ class RealtimeSynthesizer:
 
     def start(self):
         self.ifrm = 0
-        self.filt = self.exploit_transfer_func_T()
+        self.exploit_transfer_func_T()
         self.stream.start_stream()
         return 0
 
@@ -151,7 +151,7 @@ class RealtimeSynthesizer:
         self.pa.terminate()
 
     def callback(self, in_data, frame_count, time_info, status):
-        start = time.time()
+        #start = time.time()
 
         playbuff = np.zeros((self.nchannel,self.chunk), dtype=self.format_np)
         p_data = self.wf_out.readframes(self.chunk)
@@ -179,8 +179,8 @@ class RealtimeSynthesizer:
         if self.ifrm == int(np.ceil(self.nframe/self.chunk)):
             self.wf_out.rewind()
             self.ifrm = 0
-        elapsed_time = time.time()-start
-        print("- elapsed_time of filter:{0}".format(elapsed_time) + "[sec]")
+        #elapsed_time = time.time()-start
+        #print("- elapsed_time of filter:{0}".format(elapsed_time) + "[sec]")
         return (pa_outdata, pyaudio.paContinue)
 
     def waitstream(self):
@@ -198,9 +198,10 @@ class RealtimeSynthesizer:
                 print('input should be 3 float numbers separated with space.')
                 continue
             self.r_s = np.array(r_s,dtype=np.float)
-            self.lock.acquire()
-            self.filt = self.exploit_transfer_func_T()
-            self.lock.release()
+            start = time.time()
+            self.exploit_transfer_func_T()
+            elapsed_time = time.time()-start
+            print("- elapsed_time of filter update:{0}".format(elapsed_time) + "[sec]")
 
     def float2int(self,data):
         if data.dtype == 'float32' or data.dtype == 'float64':
@@ -237,7 +238,7 @@ class RealtimeSynthesizer:
         _ans = np.zeros((self.L,length))
 
         self.lock.acquire()
-        _ans = signal.fftconvolve(data,self.filt,mode='same', axes=1)[0:length]
+        _ans = signal.fftconvolve(np.tile(data,(self.L,1)), self.filt,mode='same', axes=1)[0:length]
         '''
         for i in range(self.L):
             _ans[i,:] =  np.convolve(data,self.filt[i,:],mode='same')[0:length]
@@ -272,8 +273,9 @@ class RealtimeSynthesizer:
                 d_s[:,self.M-1-i] = np.conj(d)
         d_s = np.append(d_s,d_s[:,0:self.M-1],axis=1)[:,self.M-1:]
         ans = spfft.ifft(d_s,axis=1)
-        ans = np.real(np.append(ans,ans[:,0:self.M],axis=1)[:,self.M:])
-        return ans
+        self.lock.acquire()
+        self.filt = np.real(np.append(ans,ans[:,0:self.M],axis=1)[:,self.M:])
+        self.lock.release()
         
     def __hankel(self,n,z):
         '''spherical hankel function of the first kind'''
@@ -383,12 +385,12 @@ if __name__== '__main__':
     obj = RealtimeSynthesizer("./tests/asano.wav",r, r_c, r_s, Rint, gamma, is_silent,f_max=1000,f_low=200,M=256,start_channel=5,Fs=0,dev_id=2)
 
     w_th1 = threading.Thread(target=obj.waitstream)
-    #w_th2 = threading.Thread(target=obj.update_source)
+    w_th2 = threading.Thread(target=obj.update_source)
 
     obj.start()
     
     w_th1.start()
-    #w_th2.start()
+    w_th2.start()
 
     w_th1.join()
 
