@@ -17,12 +17,12 @@ wave fileとnumpy間の読み出しと書き込みを行う.
 
 #### src/simulator.py
 src/synthesizer3D.pyを用いて、特定の周波数における理想的な周波数と今回の手法で生成された波形を画像として生成する.
-![シミュレーション画像1](https://github.com/uchiiii/SoundFieldSynthesizer/examples/intersimu8.png)
-![シミュレーション画像2](https://github.com/uchiiii/SoundFieldSynthesizer/exa    mples/intersimu9.png)
+![シミュレーション画像1](https://github.com/uchiiii/SoundFieldSynthesizer/blob/master/examples/intersimu8.png)
+![シミュレーション画像2](https://github.com/uchiiii/SoundFieldSynthesizer/blob/master/examples/intersimu9.png)
 
 #### src/Tsynthesizer3D.py
 全ての周波数に関して、周波数領域で駆動信号を求め、それらを逆フーリエ変換を用いて時間領域にし、時間領域でそれぞれのマイクの出力を求める.
-![シミュレーション画像3](https://github.com/uchiiii/SoundFieldSynthesizer/exa    mples/intersimu10.png)
+![シミュレーション画像3](https://github.com/uchiiii/SoundFieldSynthesizer/blob/master/examples/intersimu10.png)
 
 #### src/GUI.py
 GUIを用いてリアルタイムでinteractiveに仮想的な音源の位置、つまり、駆動信号をかえれるようにしたかった. (これは未完成です)
